@@ -1,7 +1,7 @@
 /**
- * Copyright 2013-2017 the original author or authors from the JHipster project.
+ * Copyright 2013-2018 the original author or authors from the JHipster project.
  *
- * This file is part of the JHipster project, see https://jhipster.github.io/
+ * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const chalk = require('chalk');
+
 module.exports = {
     askForModuleName,
     askForClient,
@@ -29,30 +31,36 @@ function askForModuleName() {
     this.askModuleName(this);
 }
 
-function askForClient() {
-    if (this.existingProject) return;
+function askForClient(meta) {
+    if (!meta && this.existingProject) return;
 
-    const done = this.async();
     const applicationType = this.applicationType;
 
-    this.prompt({
+    const choices = [
+        {
+            value: 'angularX',
+            name: 'Angular 6'
+        },
+        {
+            value: 'react',
+            name: 'React'
+        }
+    ];
+
+    const PROMPT = {
         type: 'list',
         name: 'clientFramework',
-        when: response => (applicationType !== 'microservice' && applicationType !== 'uaa'),
-        message: response => this.getNumberedQuestion('Which *Framework* would you like to use for the client?',
-            applicationType !== 'microservice' && applicationType !== 'uaa'),
-        choices: [
-            {
-                value: 'angular1',
-                name: 'AngularJS 1.x'
-            },
-            {
-                value: 'angular2',
-                name: '[BETA] Angular 4'
-            }
-        ],
-        default: 'angular1'
-    }).then((prompt) => {
+        when: response => applicationType !== 'microservice' && applicationType !== 'uaa',
+        message: `Which ${chalk.yellow('*Framework*')} would you like to use for the client?`,
+        choices,
+        default: 'angularX'
+    };
+
+    if (meta) return PROMPT; // eslint-disable-line consistent-return
+
+    const done = this.async();
+
+    this.prompt(PROMPT).then(prompt => {
         this.clientFramework = prompt.clientFramework;
         done();
     });
@@ -66,11 +74,11 @@ function askForClientSideOpts() {
         {
             type: 'confirm',
             name: 'useSass',
-            message: response => this.getNumberedQuestion('Would you like to use the LibSass stylesheet preprocessor for your CSS?', true),
-            default: false
+            message: `Would you like to enable ${chalk.yellow('*SASS*')} stylesheet preprocessor?`,
+            default: true
         }
     ];
-    this.prompt(prompts).then((props) => {
+    this.prompt(prompts).then(props => {
         this.useSass = props.useSass;
         done();
     });
